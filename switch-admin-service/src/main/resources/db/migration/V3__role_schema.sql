@@ -1,0 +1,59 @@
+-- Create ROLE table
+CREATE TABLE ROLE (
+    ROLE_ID VARCHAR2(12) PRIMARY KEY,
+    NAME VARCHAR2(100) NOT NULL,
+    DESCRIPTION VARCHAR2(500),
+    IS_ACTIVE NUMBER(1) DEFAULT 1 NOT NULL,
+    CREATED_AT TIMESTAMP(6) DEFAULT SYSTIMESTAMP NOT NULL,
+    UPDATED_AT TIMESTAMP(6),
+    CONSTRAINT UK_ROLE_NAME UNIQUE (NAME),
+    CONSTRAINT CHK_ROLE_ACTIVE CHECK (IS_ACTIVE IN (0, 1))
+);
+
+
+-- Create indexes for performance
+CREATE INDEX IDX_ROLE_ACTIVE ON ROLE(IS_ACTIVE);
+
+-- Sequence for ID generation
+CREATE SEQUENCE ROLE_SEQ
+    START WITH 1
+    INCREMENT BY 1
+    CACHE 20
+    NOCYCLE
+    ORDER;
+
+-- Create trigger for ID generation (format: ROLE00000001)
+CREATE OR REPLACE TRIGGER ROLE_BI
+BEFORE INSERT ON ROLE
+FOR EACH ROW
+BEGIN
+    IF :NEW.ROLE_ID IS NULL THEN
+        SELECT 'ROLE' || LPAD(ROLE_SEQ.NEXTVAL, 8, '0')
+        INTO :NEW.ROLE_ID
+        FROM DUAL;
+    END IF;
+
+    -- Force consistent timestamps
+    :NEW.CREATED_AT := SYSTIMESTAMP;
+END;
+/
+
+
+-- Create update timestamp trigger
+CREATE OR REPLACE TRIGGER ROLE_BU
+BEFORE UPDATE ON ROLE
+FOR EACH ROW
+BEGIN
+    :NEW.UPDATED_AT := SYSTIMESTAMP;
+END;
+/
+
+-- Table and column comments
+COMMENT ON TABLE ROLE IS 'Stores system roles and access levels';
+COMMENT ON COLUMN ROLE.ROLE_ID IS 'Primary key in ROLE00000001 format';
+COMMENT ON COLUMN ROLE.NAME IS 'Unique name of the role (e.g., Administrator)';
+COMMENT ON COLUMN ROLE.DESCRIPTION IS 'Detailed description of the role';
+COMMENT ON COLUMN ROLE.IS_ACTIVE IS 'Active status flag (1=active, 0=inactive)';
+COMMENT ON COLUMN ROLE.CREATED_AT IS 'Timestamp when role was created';
+COMMENT ON COLUMN ROLE.UPDATED_AT IS 'Timestamp when role was last updated';
+
