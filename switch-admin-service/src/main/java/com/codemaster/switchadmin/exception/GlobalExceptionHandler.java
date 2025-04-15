@@ -7,20 +7,27 @@ import io.jsonwebtoken.security.SignatureException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.HttpStatusCode;
-import org.springframework.http.ResponseEntity;
+import org.springframework.beans.TypeMismatchException;
+import org.springframework.http.*;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.web.HttpMediaTypeNotAcceptableException;
+import org.springframework.web.HttpMediaTypeNotSupportedException;
+import org.springframework.web.HttpRequestMethodNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.context.request.WebRequest;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -141,6 +148,112 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                 request.getRequestURI());
 
         return new ResponseEntity<>(apiError, HttpStatus.FORBIDDEN);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpRequestMethodNotSupported(HttpRequestMethodNotSupportedException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String supportedMethods = ex.getSupportedHttpMethods() != null ?
+                String.join(", ", ex.getSupportedHttpMethods().stream()
+                        .map(HttpMethod::name)
+                        .collect(Collectors.toSet())) :
+                "unknown";
+
+        ApiError apiError = ApiError.createDefault(
+                HttpStatus.METHOD_NOT_ALLOWED.value(),
+                "Method Not Allowed",
+                "Method " + ex.getMethod() + " is not supported. Supported methods: " + supportedMethods,
+                getRequestPath(request));
+
+        return new ResponseEntity<>(apiError, HttpStatus.METHOD_NOT_ALLOWED);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMediaTypeNotSupported(HttpMediaTypeNotSupportedException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String supportedTypes = ex.getSupportedMediaTypes().stream()
+                .map(MediaType::toString)
+                .collect(Collectors.joining(", "));
+
+        ApiError apiError = ApiError.createDefault(
+                HttpStatus.UNSUPPORTED_MEDIA_TYPE.value(),
+                "Unsupported Media Type",
+                "Media type '" + ex.getContentType() + "' is not supported. Supported types: " + supportedTypes,
+                getRequestPath(request));
+
+        return new ResponseEntity<>(apiError, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleHttpMediaTypeNotAcceptable(HttpMediaTypeNotAcceptableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        ApiError apiError = ApiError.createDefault(
+                HttpStatus.NOT_ACCEPTABLE.value(),
+                "Not Acceptable",
+                "Could not find acceptable representation",
+                getRequestPath(request));
+
+        return new ResponseEntity<>(apiError, HttpStatus.NOT_ACCEPTABLE);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestParameter(MissingServletRequestParameterException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        ApiError apiError = ApiError.createDefault(
+                HttpStatus.BAD_REQUEST.value(),
+                "Missing Request Parameter",
+                "Required parameter '" + ex.getParameterName() + "' is not present",
+                getRequestPath(request));
+
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMissingServletRequestPart(MissingServletRequestPartException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        ApiError apiError = ApiError.createDefault(
+                HttpStatus.BAD_REQUEST.value(),
+                "Missing Request Part",
+                "Required part '" + ex.getRequestPartName() + "' is not present",
+                getRequestPath(request));
+
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleNoResourceFoundException(NoResourceFoundException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        ApiError apiError = ApiError.createDefault(
+                HttpStatus.NOT_FOUND.value(),
+                "Resource Not Found",
+                "Static resource " + ex.getResourcePath() + " not found",
+                getRequestPath(request));
+
+        return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleTypeMismatch(TypeMismatchException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        String requiredType = ex.getRequiredType() != null ?
+                ex.getRequiredType().getSimpleName() : "unknown type";
+
+        String parameterName = ex instanceof MethodArgumentTypeMismatchException ?
+                ((MethodArgumentTypeMismatchException) ex).getName() : "unknown parameter";
+
+        String errorMessage = String.format(
+                "Invalid value '%s' for parameter '%s'. Expected type: %s",
+                ex.getValue(),
+                parameterName,
+                requiredType);
+
+        ApiError apiError = ApiError.builder()
+                .timestamp(LocalDateTime.now())
+                .status(HttpStatus.BAD_REQUEST.value())
+                .error("Type Mismatch")
+                .message(errorMessage)
+                .path(getRequestPath(request))
+                .build();
+
+        return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
+    }
+
+    @Override
+    protected ResponseEntity<Object> handleMissingPathVariable(MissingPathVariableException ex, HttpHeaders headers, HttpStatusCode status, WebRequest request) {
+        return super.handleMissingPathVariable(ex, headers, status, request);
     }
 
 
