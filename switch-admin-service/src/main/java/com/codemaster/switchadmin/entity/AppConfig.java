@@ -49,6 +49,7 @@ public class AppConfig {
     private String description;
 
     @Column(name = "IS_ACTIVE", nullable = false)
+    @Builder.Default
     private boolean active = true;
 
     @Column(name = "CREATED_AT", updatable = false)
