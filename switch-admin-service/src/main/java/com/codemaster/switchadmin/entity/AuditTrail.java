@@ -1,8 +1,11 @@
 package com.codemaster.switchadmin.entity;
 
+import com.codemaster.switchadmin.entity.generator.StringPrefixedSequenceIdGenerator;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 
 import java.time.LocalDateTime;
 
@@ -17,7 +20,19 @@ import java.time.LocalDateTime;
 public class AuditTrail {
 
     @Id
-    @EqualsAndHashCode.Include // Include only ID in equals/hashCode
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "AUDIT_TRAIL_SEQ")
+    @GenericGenerator(
+            name = "AUDIT_TRAIL_SEQ",
+            strategy = "com.codemaster.switchadmin.entity.generator.StringPrefixedSequenceIdGenerator",
+            parameters = {
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.SEQUENCE_PARAM, value = "AUDIT_TRAIL_SEQ"),
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.INITIAL_PARAM, value = "1"),
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.INCREMENT_PARAM, value = "1"),
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.VALUE_PREFIX_PARAMETER, value = "ADTL"),
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.NUMBER_FORMAT_PARAMETER, value = "%08d")
+            }
+    )
+    @EqualsAndHashCode.Include
     @Column(name = "AUDIT_ID", length = 12, updatable = false)
     private String auditId;
 

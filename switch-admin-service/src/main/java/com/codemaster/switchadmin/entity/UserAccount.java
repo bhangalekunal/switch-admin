@@ -1,9 +1,12 @@
 package com.codemaster.switchadmin.entity;
 
+import com.codemaster.switchadmin.entity.generator.StringPrefixedSequenceIdGenerator;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.Parameter;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -15,10 +18,22 @@ import java.util.Set;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(onlyExplicitlyIncluded = true)
+@ToString
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class UserAccount {
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "USER_ACCOUNT_SEQ")
+    @GenericGenerator(
+            name = "USER_ACCOUNT_SEQ",
+            strategy = "com.codemaster.switchadmin.entity.generator.StringPrefixedSequenceIdGenerator",
+            parameters = {
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.SEQUENCE_PARAM, value = "USER_ACCOUNT_SEQ"),
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.INITIAL_PARAM, value = "1"),
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.INCREMENT_PARAM, value = "1"),
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.VALUE_PREFIX_PARAMETER, value = "USER"),
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.NUMBER_FORMAT_PARAMETER, value = "%08d")
+            }
+    )
     @EqualsAndHashCode.Include // Include only ID in equals/hashCode
     @Column(name = "USER_ID", length = 12, updatable = false)
     private String userId;
@@ -72,5 +87,9 @@ public class UserAccount {
     public void removeRole(Role role) {
         this.roles.remove(role);
         role.getUserAccounts().remove(this);
+    }
+
+    public String getFullName() {
+        return firstName + " " + lastName;
     }
 }
