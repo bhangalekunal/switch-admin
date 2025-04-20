@@ -10,7 +10,7 @@ FROM DUAL;
 
 
 INSERT INTO USER_ACCOUNT (FIRST_NAME, LAST_NAME, PASSWORD, EMAIL, PHONE_NUMBER)
-VALUES ('System', 'Admin', '$2a$12$XH55JZ9hL3J2T1bYQwRvNuY7kZcZrj9WQNlNkD7mRgFdG8sVvXqXK', 'superadmin@company.com', '+10000000001');
+VALUES ('System', 'Admin', '$2a$10$DBpSBJgxNIqeLV1sdN6UVuRpG1S2EMCpnPxyP8B6PCwaMDrUFZ64O', 'superadmin@company.com', '+10000000001');
 
 
 -- Now assign the role to the user using subqueries
