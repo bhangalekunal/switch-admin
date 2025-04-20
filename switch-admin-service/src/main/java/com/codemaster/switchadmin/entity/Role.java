@@ -1,9 +1,12 @@
 package com.codemaster.switchadmin.entity;
 
+import com.codemaster.switchadmin.entity.generator.StringPrefixedSequenceIdGenerator;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.annotations.Parameter;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -20,6 +23,18 @@ import java.util.Set;
 public class Role {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "ROLE_SEQ")
+    @GenericGenerator(
+            name = "ROLE_SEQ",
+            strategy = "com.codemaster.switchadmin.entity.generator.StringPrefixedSequenceIdGenerator",
+            parameters = {
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.SEQUENCE_PARAM, value = "ROLE_SEQ"),
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.INITIAL_PARAM, value = "1"),
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.INCREMENT_PARAM, value = "1"),
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.VALUE_PREFIX_PARAMETER, value = "ROLE"),
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.NUMBER_FORMAT_PARAMETER, value = "%08d")
+            }
+    )
     @EqualsAndHashCode.Include
     @Column(name = "ROLE_ID", length = 12, updatable = false)
     private String roleId;

@@ -1,11 +1,11 @@
 package com.codemaster.switchadmin.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import com.codemaster.switchadmin.entity.generator.StringPrefixedSequenceIdGenerator;
+import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.Parameter;
 import org.hibernate.annotations.Nationalized;
 import org.hibernate.annotations.UpdateTimestamp;
 
@@ -17,11 +17,23 @@ import java.time.LocalDateTime;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@ToString(onlyExplicitlyIncluded = true)
+@ToString
 @EqualsAndHashCode(onlyExplicitlyIncluded = true)
 public class AppConfig {
     @Id
-    @EqualsAndHashCode.Include // Include only ID in equals/hashCode
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "APP_CONFIG_SEQ")
+    @GenericGenerator(
+            name = "APP_CONFIG_SEQ",
+            strategy = "com.codemaster.switchadmin.entity.generator.StringPrefixedSequenceIdGenerator",
+            parameters = {
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.SEQUENCE_PARAM, value = "APP_CONFIG_SEQ"),
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.INITIAL_PARAM, value = "1"),
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.INCREMENT_PARAM, value = "1"),
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.VALUE_PREFIX_PARAMETER, value = "CONF"),
+                    @Parameter(name = StringPrefixedSequenceIdGenerator.NUMBER_FORMAT_PARAMETER, value = "%08d")
+            }
+    )
+    @EqualsAndHashCode.Include
     @Column(name = "CONFIG_ID", length = 12, updatable = false)
     private String configId;
 
@@ -37,7 +49,6 @@ public class AppConfig {
     private String description;
 
     @Column(name = "IS_ACTIVE", nullable = false)
-    @Builder.Default
     private boolean active = true;
 
     @Column(name = "CREATED_AT", updatable = false)
