@@ -356,6 +356,47 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         return new ResponseEntity<>(apiError, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(AppConfigNotFoundException.class)
+    public ResponseEntity<ApiError> handleAppConfigNotFoundException(
+            AppConfigNotFoundException ex,
+            HttpServletRequest request) {
+
+        ApiError apiError = ApiError.createDefault(
+                HttpStatus.NOT_FOUND.value(),
+                "AppConfig Not Found",
+                ex.getMessage(),
+                request.getRequestURI());
+
+        return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(AppConfigAlreadyExistsException.class)
+    public ResponseEntity<ApiError> handleAppConfigAlreadyExistsException(
+            AppConfigAlreadyExistsException ex,
+            HttpServletRequest request) {
+
+        ApiError apiError = ApiError.createDefault(
+                HttpStatus.CONFLICT.value(),
+                "AppConfig Already Exists",
+                ex.getMessage(),
+                request.getRequestURI());
+
+        return new ResponseEntity<>(apiError, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(UserAccountNotFoundException.class)
+    public ResponseEntity<ApiError> handleUserAccountNotFoundException(
+            UserAccountNotFoundException ex,
+            HttpServletRequest request) {
+
+        ApiError apiError = ApiError.createDefault(
+                HttpStatus.NOT_FOUND.value(),
+                "User Account Not Found",
+                ex.getMessage(),
+                request.getRequestURI());
+
+        return new ResponseEntity<>(apiError, HttpStatus.NOT_FOUND);
+    }
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiError> handleAllExceptions(

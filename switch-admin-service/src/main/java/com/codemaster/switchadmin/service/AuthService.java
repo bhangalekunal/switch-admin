@@ -2,6 +2,8 @@ package com.codemaster.switchadmin.service;
 
 import com.codemaster.switchadmin.dto.AuthRequest;
 import com.codemaster.switchadmin.dto.AuthResponse;
+import com.codemaster.switchadmin.entity.UserAccount;
+import com.codemaster.switchadmin.repository.UserAccountRepository;
 import com.codemaster.switchadmin.util.JwtUtil;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
