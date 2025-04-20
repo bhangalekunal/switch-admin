@@ -75,14 +75,14 @@ public class AppConfigService {
         AppConfig savedConfig = appConfigRepository.save(config);
 
         // Audit the creation
-        /*auditService.logConfigChange(
+        auditService.logConfigChange(
                 userAccount.getUserId(),
                 userAccount.getFullName(),
                 AuditTrail.ActionType.CREATE,
                 savedConfig.getConfigId(),
                 null,
                 savedConfig
-        );*/
+        );
 
         return convertToDto(savedConfig);
     }

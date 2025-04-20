@@ -79,9 +79,6 @@ public class AuditTrail {
     @Column(name = "USER_AGENT")
     private String userAgent;
 
-    @Column(name = "SESSION_ID", length = 64)
-    private String sessionId;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "AUTH_METHOD", length = 20)
     private AuthMethod authMethod;
