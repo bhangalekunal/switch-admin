@@ -1,1 +1,44 @@
-<p>not-found works!</p>
+<mat-card class="not-found-card">
+    <mat-card-header>
+      <div mat-card-avatar class="error-icon">
+        <mat-icon color="warn">error_outline</mat-icon>
+      </div>
+      <mat-card-title>404 - Page Not Found</mat-card-title>
+      <mat-card-subtitle>We couldn't find what you're looking for</mat-card-subtitle>
+    </mat-card-header>
+  
+    <mat-card-content>
+      <div class="content">
+        <img 
+          src="/images/404-error.svg" 
+          alt="404 Error Illustration"
+          class="error-image"
+        >
+        <p class="description">
+          The page you requested doesn't exist or has been moved.
+        </p>
+      </div>
+    </mat-card-content>
+  
+    <mat-card-actions align="end">
+      <button 
+        mat-raised-button 
+        color="primary" 
+        routerLink="/"
+        class="home-button"
+      >
+        <mat-icon>home</mat-icon>
+        Back to Home
+      </button>
+      
+      <button 
+        mat-button 
+        color="accent" 
+        routerLink="/contact"
+        class="support-button"
+      >
+        <mat-icon>help</mat-icon>
+        Contact Support
+      </button>
+    </mat-card-actions>
+  </mat-card>
